@@ -1,11 +1,12 @@
 let express = require("express");
 let app = express();
+const ConnectDB = require("./config/db.js")
+ConnectDB()
 const errorhandler = require("./middlewares/errorhandler.js");
 const cors = require("cors");
 const bodyparser = require("body-parser");
 require("dotenv").config();
-const ConnectDB = require("./config/db.js")
-ConnectDB()
+
 app.use(bodyparser.urlencoded({ extended: true }));
 app.use(bodyparser.json());
 
