@@ -1,0 +1,57 @@
+@import "tailwindcss";
+@import url('https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Playwrite+CZ:wght@100..400&family=Roboto+Condensed:ital,wght@0,100..900;1,100..900&display=swap');
+
+@import url('https://fonts.googleapis.com/css2?family=Pacifico&family=Playwrite+CZ:wght@100..400&family=Playwrite+US+Trad+Guides&display=swap');
+
+.mySwiper .swiper-button-next,
+.mySwiper .swiper-button-prev {
+  width: 30px !important;
+  height: 30px !important;
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: translateY(-50%);
+  font-size: 20px !important;
+  padding-top: 5px !important;
+}
+
+.mySwiper .swiper-button-next {
+  right: 5px !important;
+}
+
+.mySwiper .swiper-button-prev {
+  left: 5px !important;
+}
+
+/* Make arrows appear below the slider */
+.genre-swiper {
+  position: relative;
+  padding-bottom: 50px; /* space for navigation arrows */
+}
+
+.genre-swiper .swiper-button-prev,
+.genre-swiper .swiper-button-next {
+  top: auto;          /* remove default vertical positioning */
+  bottom: 0;          /* move arrows to the bottom */
+  transform: none;    /* remove default translateY(-50%) */
+  width: 35px;
+  height: 55px;
+  color: #000;        /* arrow color */
+}
+
+/* Move left/right arrows slightly left/right */
+.genre-swiper .swiper-button-prev {
+  left: 0;
+}
+
+.genre-swiper .swiper-button-next {
+  right: 0;
+}
+
+/* Optional: make arrows bigger */
+.genre-swiper .swiper-button-prev::after,
+.genre-swiper .swiper-button-next::after {
+  font-size: 20px;
+  font-weight: bold;
+}
