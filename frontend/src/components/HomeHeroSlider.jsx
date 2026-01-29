@@ -1,26 +1,21 @@
-
-import React, { createContext, useContext, useRef, useState } from 'react';
-// Import Swiper React components
+import React, { useContext } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
-// Import Swiper styles
 import 'swiper/css';
 import 'swiper/css/pagination';
 import 'swiper/css/navigation';
 
-// import './styles.css';
-
-// import required modules
 import { Autoplay, Pagination, Navigation } from 'swiper/modules';
 import { moviecontext } from '../App';
 import { useNavigate } from 'react-router-dom';
 
-
 export default function Content1() {
-  let { Mov, setMovie } = useContext(moviecontext)
-  let navigate = useNavigate()
+  let { Mov } = useContext(moviecontext);
+  let navigate = useNavigate();
+
   return (
-    <>
+    /* 🔥 HIDDEN on tablet & mobile, visible only on lg+ */
+    <div className="hidden lg:block">
       <Swiper
         spaceBetween={30}
         centeredSlides={true}
@@ -28,45 +23,53 @@ export default function Content1() {
           delay: 2500,
           disableOnInteraction: false,
         }}
-        pagination={{
-          clickable: true,
-        }}
+        pagination={{ clickable: true }}
         navigation={true}
         modules={[Autoplay, Pagination, Navigation]}
-        className="mySwiper h-100 "
+        className="mySwiper"
       >
-        {Mov.map((v, i) => {
-          return (
-            <SwiperSlide
-              onClick={() => navigate(`/movies/${v._id}`)}
-              className="w-[80%] h-[450px] bg-cover bg-center my-5 cursor-pointer object-cover rounded-2xl"
-              style={{
-                backgroundImage: `url(${v.poster.url})`,
-                backgroundSize: '100% 100%',
-                repeat: 'no-repeat',  
-              }}
-            >
-              <div key={i} className='flex  justify-between w-full h-full  gap-3 text-white '>
-                <div className='flex flex-col justify-center text-center items-center w-[50%] gap-3'>
+        {Mov.map((v, i) => (
+          <SwiperSlide
+            key={i}
+            onClick={() => navigate(`/movies/${v._id}`)}
+            className="w-[80%] h-[420px] xl:h-[480px] 
+                       bg-cover bg-center my-5 cursor-pointer 
+                       rounded-2xl overflow-hidden"
+            style={{
+              backgroundImage: `url(${v.poster.url})`,
+              backgroundSize: 'cover',
+              backgroundRepeat: 'no-repeat',
+            }}
+          >
+            <div className="flex w-full h-full text-white bg-black/30 rounded-2xl">
+              {/* LEFT CONTENT */}
+              <div className="w-1/2 flex flex-col justify-center items-center gap-4 text-center px-6">
+                <h1 className="text-3xl xl:text-5xl font-bold">
+                  {v.name}
+                </h1>
 
-                  <h1 className='text-5xl'>{v.name}</h1>
-                  <h2 className='text-2xl'>{v.genre}|{v.category}</h2>
-                  <button className="bg-gray-800  shadow-2xl text-white font-bold py-2 px-4 rounded  hover:bg-gray-950 transition cursor-pointer">
-                    Book me
-                  </button>
-                </div>
-                <div className='w-[50%] text-center  p-1'>
-                  <img src={v.poster.url} class=" w-[50%] mx-39 h-[90%] p-2 flex justify-end rounded-2xl object-cover " alt="..." />
+                <h2 className="text-lg xl:text-2xl">
+                  {v.genre} | {v.category}
+                </h2>
 
-                </div>
+                <button className="bg-gray-900 px-6 py-2 rounded 
+                                   font-bold hover:bg-black transition">
+                  Book me
+                </button>
               </div>
-            </SwiperSlide>
-          )
-        })}
 
-
+              {/* RIGHT POSTER */}
+              <div className="w-1/2 flex justify-center items-center">
+                <img
+                  src={v.poster.url}
+                  className="w-[60%] h-[85%] object-cover rounded-2xl shadow-2xl"
+                  alt={v.name}
+                />
+              </div>
+            </div>
+          </SwiperSlide>
+        ))}
       </Swiper>
-    </>
+    </div>
   );
 }
-

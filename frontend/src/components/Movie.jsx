@@ -3,73 +3,59 @@ import { moviecontext } from '../App'
 import { Link, useNavigate } from 'react-router-dom'
 
 function Movie() {
-  let { Mov, setMovie } = useContext(moviecontext)
-  let navigate = useNavigate();
+  let { Mov } = useContext(moviecontext)
+  let navigate = useNavigate()
+
   const releasedmovies = Mov.filter(movie => movie.released !== false)
-  const upcomingmovies = Mov.filter((movie) => movie.released === false);
-  console.log('releasedmovies', releasedmovies);
+  const upcomingmovies = Mov.filter((movie) => movie.released === false)
 
   return (
-
-    <div className='p-5 m-10 '>
-      <div className='flex justify-between w-full'>
-        <h2 className='text-3xl font-bold'>Now Showing</h2>
-        {/* <p>View all</p> */}
-      </div>
-      <div className="flex flex-wrap gap-3 p-5">
-        <button className="px-4 py-2 bg-gray-100 border rounded-xl hover:bg-gray-200 transition">
-          Filter
-        </button>
-
-        <button className="px-4 py-2 bg-gray-100 border rounded-xl hover:bg-gray-200 transition">
-          Top Selling
-        </button>
-
-        <button className="px-4 py-2 bg-gray-100 border rounded-xl hover:bg-gray-200 transition">
-          English
-        </button>
-
-        <button className="px-4 py-2 bg-gray-100 border rounded-xl hover:bg-gray-200 transition">
-          Hindi
-        </button>
-
-        <button className="px-4 py-2 bg-gray-100 border rounded-xl hover:bg-gray-200 transition">
-          Romance
-        </button>
-
-        <button className="px-4 py-2 bg-gray-100 border rounded-xl hover:bg-gray-200 transition">
-          Drama
-        </button>
-
-        <button className="px-4 py-2 bg-gray-100 border rounded-xl hover:bg-gray-200 transition">
-          3D
-        </button>
+    <div className='p-4 sm:p-6 md:p-10'>
+      <div className='flex justify-between w-full mb-4'>
+        <h2 className='text-2xl sm:text-3xl font-bold'>Now Showing</h2>
       </div>
 
-      <div className='flex gap-7 w-full flex-wrap p-3 '>
-        {
-          releasedmovies.map((v, i) => {
-            return (
-              <Link to={`/movies/${v._id}`} key={v?._id}>
+      <div className="flex flex-wrap gap-3 mb-6">
+        {["Filter", "Top Selling", "English", "Hindi", "Romance", "Drama", "3D"].map((b) => (
+          <button
+            key={b}
+            className="px-4 py-2 bg-gray-100 border rounded-xl hover:bg-gray-200 transition 
+                       text-sm sm:text-base"
+          >
+            {b}
+          </button>
+        ))}
+      </div>
 
-                <div className='w-[280px] h-fit border rounded-b-lg '>
-                  <img src={v.poster.url} alt="" className='w-[100%] h-[450px] object-cover' />
-                  <p className='px-5 font-bold text-xl py-1'>{v.name}</p>
-                  <div className='flex flex-col flex-wrapitems-center px-5 pb-2 gap-2 text-gray-500 text-[14px]  font-bold'>
-                    <p className='whitespace-nowrap'>{v.genre}</p>
-                    <span className="w-1.5 h-1.5 rounded-2xl bg-gray-500 self-center"></span>
-                    <p className=''>{v?.languages.slice(0, 2).join(", ")}</p>
-                  </div>
+      <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
+        {releasedmovies.map((v) => (
+          <Link to={`/movies/${v._id}`} key={v._id}>
+            <div className='border rounded-b-lg hover:shadow-lg transition overflow-hidden'>
+              <img
+                src={v.poster.url}
+                alt={v.name}
+                className='w-full h-[260px] sm:h-[340px] md:h-[380px] lg:h-[420px] object-cover'
+              />
+
+              <p className='px-4 pt-2 font-bold text-sm sm:text-base truncate'>
+                {v.name}
+              </p>
+
+              <div className='flex flex-col px-4 pb-3 gap-1 text-gray-500 text-xs sm:text-sm font-bold'>
+                <p className='truncate'>{v.genre}</p>
+
+                <div className='flex items-center gap-2'>
+                  <span className="w-1.5 h-1.5 rounded-full bg-gray-500"></span>
+                  <p className='truncate'>
+                    {v.languages.slice(0, 2).join(", ")}
+                  </p>
                 </div>
-              </Link>
-            )
-          })
-        }
+              </div>
+            </div>
+          </Link>
+        ))}
       </div>
-
-
     </div>
-
   )
 }
 
