@@ -39,6 +39,7 @@ export default function Content1() {
               backgroundImage: `url(${v.poster.url})`,
               backgroundSize: 'cover',
               backgroundRepeat: 'no-repeat',
+              opacity: '1',
             }}
           >
             <div className="flex w-full h-full text-white bg-black/30 rounded-2xl">
