@@ -115,8 +115,10 @@ function Navbar() {
           </div>
 
           {/* HAMBURGER */}
-          <div className="md:hidden text-3xl cursor-pointer"
-            onClick={() => setMobileMenu(!mobileMenu)}>
+          <div
+            className="md:hidden text-3xl cursor-pointer"
+            onClick={() => setMobileMenu(!mobileMenu)}
+          >
             ☰
           </div>
         </div>
@@ -185,6 +187,32 @@ function Navbar() {
                   <div>
                     <p className="font-bold">{v.name}</p>
                     <p className="text-sm">{v.genre}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </DialogPanel>
+        </div>
+      </Dialog>
+
+      {/* THEATRES DIALOG */}
+      <Dialog open={opent} onClose={() => setOpent(false)} className="relative z-50">
+        <div className="fixed inset-0 flex justify-center items-start mt-24">
+          <DialogPanel className="bg-white p-6 rounded-lg w-full max-w-3xl">
+            <DialogTitle className="text-xl font-bold mb-4">Theatres</DialogTitle>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {theatres.map(v => (
+                <div
+                  key={v._id}
+                  onClick={() => {
+                    setOpent(false)
+                    navigate(`/theatres/${v._id}`)
+                  }}
+                  className="flex gap-3 cursor-pointer"
+                >
+                  <div>
+                    <p className="font-bold">{v.city}</p>
+                    <p className="text-sm">{v.location}</p>
                   </div>
                 </div>
               ))}
