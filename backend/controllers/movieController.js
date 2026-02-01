@@ -92,4 +92,30 @@ let FilterMovie = async (req, res) => {
         res.json({ success: false, message: error.message })
     }
 }
-module.exports = { FilterMovie, createMovie, getMovies, getMovie, updateMovies, deleteMovies }
+let FilterMovieQuery = async (req, res) => {
+    try {
+        const { langauage, category } = req.query;
+
+        let filter = [];
+        if (langauage != "null" && langauage) {
+            console.log("langauage", langauage)
+            filter.push({ langauage: { $in: langauage.split(",").map(l => new RegExp(`^${l}$`, "i")) } })
+            // {langauage:[hindi,english]}
+        }
+
+        if (category != "null" && category) {
+            console.log("category", category)
+            filter.push({ category: { $in: category.split(",").map(l => new RegExp(`^${l}$`, "i")) } })
+
+        }
+        console.log("filter", filter)
+
+        const movies = await Movie.find({
+            "$and": [...filter]
+        });
+        res.status(200).json({ success: true, message: "filter", data: movies, });
+    } catch (error) {
+        res.status(500).json({ success: false, message: error.message });
+    }
+}
+module.exports = { FilterMovie, createMovie, getMovies, getMovie, updateMovies, deleteMovies, FilterMovieQuery }

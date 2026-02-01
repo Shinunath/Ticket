@@ -28,7 +28,7 @@ function App() {
   }, []);
   let [theatres, setTheatres] = useState([])
   const fetchTheatres = async () => {
-    const res = await fetch("/api/theatres/gettheatres")
+    const res = await fetch(`/api/theatres/gettheatres`)
     const data = await res.json();
     setTheatres(data.data)
   };

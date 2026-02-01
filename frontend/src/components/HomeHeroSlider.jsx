@@ -32,14 +32,15 @@ export default function Content1() {
           <SwiperSlide
             key={i}
             onClick={() => navigate(`/movies/${v._id}`)}
-            className="w-[80%] h-[420px] xl:h-[480px] 
+            className="w-[80%] h-[400px] 
                        bg-cover bg-center my-5 cursor-pointer 
                        rounded-2xl overflow-hidden"
             style={{
               backgroundImage: `url(${v.poster.url})`,
-              backgroundSize: 'cover',
+              backgroundSize: "cover",
               backgroundRepeat: 'no-repeat',
-              opacity: '1',
+              backgroundPosition: 'top',
+
             }}
           >
             <div className="flex w-full h-full text-white bg-black/30 rounded-2xl">
@@ -63,10 +64,11 @@ export default function Content1() {
               <div className="w-1/2 flex justify-center items-center">
                 <img
                   src={v.poster.url}
-                  className="w-[60%] h-[85%] object-cover rounded-2xl shadow-2xl"
                   alt={v.name}
+                  className="max-w-[260px] w-full aspect-[2/3] object-cover rounded-2xl shadow-2xl my-5"
                 />
               </div>
+
             </div>
           </SwiperSlide>
         ))}

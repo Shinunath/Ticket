@@ -75,7 +75,7 @@ export default function ShowForm() {
 
         try {
             const res = await axios.post(
-                "http://localhost:4000/api/show/create",
+                "/api/show/createshow",
                 formData,
                 {
                     headers: {

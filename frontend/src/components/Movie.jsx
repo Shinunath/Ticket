@@ -1,30 +1,74 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { moviecontext } from '../App'
 import { Link, useNavigate } from 'react-router-dom'
+// import Movie from '../components/Movie'
+import axios from 'axios'
+
 
 function Movie() {
-  let { Mov } = useContext(moviecontext)
+  // let { Mov } = useContext(moviecontext)
   let navigate = useNavigate()
+  let { Mov, setMovie } = useContext(moviecontext)
+  const releasedmovies = Mov.filter(movie => movie.released !== false);
+  const [filter, setfilter] = useState({ langauage: null, category: null })
 
-  const releasedmovies = Mov.filter(movie => movie.released !== false)
+  // const releasedmovies = Mov.filter(movie => movie.released !== false)
   const upcomingmovies = Mov.filter((movie) => movie.released === false)
+  let FilterMovie = async () => {
+    try {
+      let { data } = await axios(`/api/movie/filtermovie-query/?langauage=${filter.langauage}&category=${filter.category}`)
+      setMovie([...data.data])
+    } catch (error) {
+      console.log(error)
+
+    }
+  }
+  console.log(filter)
+  useEffect(() => {
+    FilterMovie()
+  }, [filter])
 
   return (
     <div className='p-4 sm:p-6 md:p-10'>
       <div className='flex justify-between w-full mb-4'>
         <h2 className='text-2xl sm:text-3xl font-bold'>Now Showing</h2>
       </div>
+      <div className="flex flex-wrap gap-3 py-5">
+        <button className="px-4 py-2  border border-gray-300 rounded-xl hover:bg-gray-200 transition">
+          Filter
+        </button>
 
-      <div className="flex flex-wrap gap-3 mb-6">
-        {["Filter", "Top Selling", "English", "Hindi", "Romance", "Drama", "3D"].map((b) => (
-          <button
-            key={b}
-            className="px-4 py-2 bg-gray-100 border rounded-xl hover:bg-gray-200 transition 
-                       text-sm sm:text-base"
-          >
-            {b}
-          </button>
-        ))}
+        <button onClick={() => {
+          setfilter({ ...filter, langauage: "English" })
+
+        }} className="px-4 py-2  border border-gray-300 rounded-xl hover:bg-gray-200 transition">
+          English
+        </button>
+
+        <button onClick={() => {
+          setfilter({ ...filter, langauage: "Hindi" })
+
+        }} className="px-4 py-2  border border-gray-300 rounded-xl hover:bg-gray-200 transition">
+          Hindi
+        </button>
+
+        <button onClick={() => {
+          setfilter({ ...filter, category: "action" })
+
+        }} className="px-4 py-2  border border-gray-300 rounded-xl hover:bg-gray-200 transition">
+          Action
+        </button>
+
+        <button onClick={() => {
+          setfilter({ ...filter, category: "biography" })
+
+        }} className="px-4 py-2  border border-gray-300 rounded-xl hover:bg-gray-200 transition">
+          Biography
+        </button>
+
+        <button className="px-4 py-2  border border-gray-300 rounded-xl hover:bg-gray-200 transition">
+          3D
+        </button>
       </div>
 
       <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
