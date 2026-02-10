@@ -4,177 +4,218 @@ let { hashpassword, comparepassword } = require("../utils/hash");
 const otp = require("../utils/otp");
 const { generatetoken } = require("../utils/token");
 const { sendEmail } = require("../utils/mail");
-let MovieUser = require("../models/movieuserModel")
-let register = async (req, res) => {
-
+let UserSchemaModel = require("../models/userModel");
+const otpSchemaModel = require("../models/otpModel");
+const register = async (req, res) => {
     try {
-        let { name, email, password, mobileNumber, address, interest } = req.body;
+        const { name, email, password, mobileNumber, address, interest } = req.body;
+
         if (!name || !email || !password || !mobileNumber || !address || !interest) {
-            return res.status(500).json({ success: false, message: "Please provide all the details" })
+            return res.status(400).json({
+                success: false,
+                message: "Please provide all the details"
+            });
         }
 
-        let hashed = await hashpassword(password)
-        let newotp = otp();
-        let expiretime = Date.now() + 10 * 60 * 1000;
-        console.time('first')
-        await sendEmail(email, "verification otp", "check this " + newotp, `<!DOCTYPE html>
-        <html>
- 
-        <head>
-            <title>Email Newsletter</title>
-            <link rel="important stylesheet" href="chrome://messagebody/skin/messageBody.css">
-            <style>
-                body {
-                    padding: 10px;
-                    background: grey;
-                    color: white;
-                    margin: 10px;
-                    border: solid black;
-                }
-            </style>
-        </head>
- 
-        <body>
-            <h1> HERE is your otp: ${newotp}</h1>
-        </body>
- 
-        </html>`)
-        console.timeEnd('first')
-        // let newuser = await MovieUser({
-        //     name,
-        //     email,
-        //     password: hashed,
-        //     mobileNumber,
-        //     address,
-        //     interest,
-        //     otp: newotp,
-        //     otpExpiry: expiretime,
-        //     isVerified: false,
-        //     createdAt: Date.now()
-        // });
-        // await newuser.save()
-        let newuser = await MovieUser.create({
-            name,
+        let user = await UserSchemaModel.findOne({ email });
+
+        if (user && user.isVerified) {
+            return res.status(400).json({
+                success: false,
+                message: "Email already registered"
+            });
+        }
+
+        const hashedPassword = await hashpassword(password);
+
+        const newOtp = otp().toString();
+        const expiryTime = Date.now() + 10 * 60 * 1000;
+
+        if (user) {
+            // 🔁 Re-register unverified user
+            user.name = name;
+            user.password = hashedPassword;
+            user.mobileNumber = mobileNumber;
+            user.address = address;
+            user.interest = interest;
+            user.isVerified = false;
+
+            await user.save();
+        } else {
+            // 🆕 New user
+            user = await UserSchemaModel.create({
+                name,
+                email,
+                password: hashedPassword,
+                mobileNumber,
+                address,
+                interest,
+                isVerified: false
+            });
+        }
+
+        const otpRecord = await otpSchemaModel.findOneAndUpdate(
+            { user: user._id },                 // 🔍 filter (find by user)
+            {                                   // ✏️ update
+                otp: newOtp,
+                otpExpiry: expiryTime
+            },
+            {
+                upsert: true,                   // ➕ create if not exists
+                new: true                       // 🔁 return updated/new document
+            }
+        )
+
+        await sendEmail(
             email,
-            password: hashed,
-            mobileNumber,
-            address,
-            interest,
-            otp: newotp,
-            otpExpiry: expiretime,
-            isVerified: false,
-            createdAt: Date.now()
+            "Verification OTP",
+            `Your OTP is ${newOtp}`,
+            `<h1>Your OTP is ${newOtp}</h1>`
+        );
+
+        res.status(201).json({
+            success: true,
+            message: "User registered successfully, OTP sent",
+            email
         });
-        // let newuser = await MovieUser.insertOne({
-        //     name,
-        //     email,
-        //     password: hashed,
-        //     mobileNumber,
-        //     address,
-        //     interest,
-        //     otp: newotp,
-        //     otpExpiry: expiretime,
-        //     isVerified: false,
-        //     createdAt: Date.now()
-        // });
 
-
-        res.status(201).json({ success: true, message: "User Registered successfully", data: newuser })
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message })
+        res.status(500).json({
+            success: false,
+            message: "Server error"
+        });
     }
-}
+};
+
+
 let resendOtp = async (req, res) => {
     try {
+        const { email } = req.body;
 
-        let { email } = req.body;
-        let user = await MovieUser.findOne({ email });
+        const user = await UserSchemaModel.findOne({ email });
         if (!user) {
-            return res.status(500).json({ success: false, message: "User not found" })
+            return res.status(400).json({ message: "User not found" });
         }
-        let newotp = otp();
-        let exprietime = Date.now() + 10 * 60 * 1000;
-        await sendEmail(email, " new verification otp", "check this " + newotp, `<!DOCTYPE html>
-<html>
- 
-<head>
-    <title>Email Newsletter</title>
-    <link rel="important stylesheet" href="chrome://messagebody/skin/messageBody.css">
-    <style>
-        body {
-            padding: 10px;
-            background: grey;
-            color: white;
-            margin: 10px;
-            border: solid black;
+
+        if (user.isVerified) {
+            return res.status(400).json({ message: "User already verified" });
         }
-    </style>
-</head>
- 
-<body>
-    <h1> HERE is your new  otp: ${newotp}</h1>
-</body>
- 
-</html>`)
-        await MovieUser.updateOne(
-            { email },
-            { "$set": { otp: newotp, otpExpiry: exprietime } }
+
+        const newOtp = Math.floor(100000 + Math.random() * 900000).toString();
+        const expiryTime = Date.now() + 10 * 60 * 1000;
+
+        const otpRecord = await otpSchemaModel.findOneAndUpdate(
+            { user: user._id },                 // 🔍 filter (find by user)
+            {                                   // ✏️ update
+                otp: newOtp,
+                otpExpiry: expiryTime
+            },
+            {
+                upsert: true,                   // ➕ create if not exists
+                new: true                       // 🔁 return updated/new document
+            }
         )
-        res.status(200).json({ success: true, message: "otp send successfully" })
+
+        await sendEmail(
+            email,
+            "New Verification OTP",
+            `Your OTP is ${newOtp}`,
+            `<h2>Your OTP: ${newOtp}</h2>`
+        );
+
+        res.status(200).json({ message: "OTP resent successfully" });
 
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message })
+        res.status(500).json({ message: error.message });
     }
-}
-let verifyOtp = async (req, res) => {
-    try {
+};
 
-        let { email, otp } = req.body;
-        let user = await MovieUser.findOne({ email });
+
+const verifyOtp = async (req, res) => {
+    try {
+        const { email, otp } = req.body;
+
+        if (!email || !otp) {
+            return res.status(400).json({ message: "Email and OTP required" });
+        }
+
+        const user = await UserSchemaModel.findOne({ email });
         if (!user) {
-            return res.status(500).json({ success: false, message: "User not found" })
+            return res.status(400).json({ message: "User not found" });
         }
-        if (otp != user.otp || user.otpExpiry < Date.now()) {
-            return res.status(500).json({ success: false, message: "invalid otp" })
-        } else {
-            await MovieUser.findOneAndUpdate(
-                { email },
-                { isVerified: true, otp: "", otpExpiry: "" }
-            )
-            res.status(200).json({ success: true, message: "User verified successfully" })
+
+        if (user.isVerified) {
+            return res.status(400).json({ message: "User already verified" });
         }
+
+        const otpRecord = await otpSchemaModel.findOne({ user: user._id });
+
+        if (!otpRecord) {
+            return res.status(400).json({ message: "OTP not found or already used" });
+        }
+
+        if (otpRecord.otp !== otp) {
+            return res.status(400).json({ message: "Invalid OTP" });
+        }
+
+        if (Date.now() > Number(otpRecord.otpExpiry)) {
+            return res.status(400).json({ message: "OTP expired" });
+        }
+
+        user.isVerified = true;
+        await user.save();
+        res.status(200).json({ message: "OTP verified successfully", success: true });
+
     } catch (error) {
-        res.status(500).json({ success: false, message: error.message })
+        console.error(error);
+        res.status(500).json({ message: "Server error" });
     }
-}
+};
 
-
-
-let login = async (req, res) => {
+const login = async (req, res) => {
     try {
 
-        let { email, password } = req.body;
+        const { email, password } = req.body;
 
-        let user = await MovieUser.findOne({ email });
-        if (!user || !user.isVerified) {
-            return res.status(500).json({ success: false, message: "User not found or not verified" })
+        const user = await UserSchemaModel.findOne({ email });
+        if (!user) {
+            return res.status(500).json({ success: false, message: "User not found with this email" })
         }
-        let ismatch = await comparepassword(password, user.password);
-        if (!ismatch) {
+        if (!user.isVerified) {
+            return res.status(500).json({ success: false, message: "Please verify your account first" })
+        }
+        const passwordMatched = await comparepassword(password, user.password);
+
+        if (!passwordMatched) {
             return res.status(500).json({ success: false, message: "please provide valid credentials" })
         }
-        let token = await generatetoken({ userid: user._id }, process.env.SECRETKEY, '1d')
-        res.status(200).json({ success: true, message: "login  successfully", token: token })
+        const token = await generatetoken({ userid: user._id }, process.env.SECRETKEY, '1d')
+
+        res.status(200).json({
+            success: true, message: "login  successfully", response: {
+                user: user,
+                token: token
+            }
+        })
     } catch (error) {
         res.status(500).json({ success: false, message: error.message })
     }
 }
-let profile = (req, res) => {
+
+const profile = async (req, res) => {
     try {
-        if (!req.user) {
-            return res.status(500).json({ success: false, message: "not found" })
+        const user = await UserSchemaModel.findOne({ email });
+        if (!user) {
+            return res.status(500).json({ success: false, message: "User not found with this email" })
         }
-        res.send({ data: req.user })
+        if (!user.isVerified) {
+            return res.status(500).json({ success: false, message: "Please verify your account first" })
+        }
+        res.status(200).json({
+            success: true, message: "Profile fetched successfully", response: {
+                user: user,
+            }
+        })
     } catch (error) {
         res.status(500).json({ success: false, message: error.message })
     }
@@ -184,7 +225,7 @@ let deleteuser = async (req, re) => {
     try {
 
         let { id } = req.params();
-        await MovieUser.findByIdAndDelete(id)
+        await UserSchemaModel.findByIdAndDelete(id)
 
     } catch (error) {
         res.status(500).json({ success: false, message: error.message })

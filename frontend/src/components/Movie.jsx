@@ -3,6 +3,7 @@ import { moviecontext } from '../App'
 import { Link, useNavigate } from 'react-router-dom'
 // import Movie from '../components/Movie'
 import axios from 'axios'
+import '../App.css'
 
 
 function Movie() {
@@ -74,7 +75,7 @@ function Movie() {
       <div className='grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6'>
         {releasedmovies.map((v) => (
           <Link to={`/movies/${v._id}`} key={v._id}>
-            <div className='border rounded-b-lg hover:shadow-lg transition overflow-hidden'>
+            <div className='border-gray-300 border rounded-b-lg hover:shadow-lg transition overflow-hidden'>
               <img
                 src={v.poster.url}
                 alt={v.name}
@@ -85,12 +86,12 @@ function Movie() {
                 {v.name}
               </p>
 
-              <div className='flex flex-col px-4 pb-3 gap-1 text-gray-500 text-xs sm:text-sm font-bold'>
+              <div className='px-4 pb-3 gap-1 text-gray-500 text-xs sm:text-sm font-bold flex flex-row'>
                 <p className='truncate'>{v.genre}</p>
 
                 <div className='flex items-center gap-2'>
                   <span className="w-1.5 h-1.5 rounded-full bg-gray-500"></span>
-                  <p className='truncate'>
+                  <p className='w-48 truncate'>
                     {v.languages.slice(0, 2).join(", ")}
                   </p>
                 </div>

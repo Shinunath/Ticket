@@ -6,4 +6,4 @@ export const endPoints = {
         list: `${API_BASE_URL}/movie/getmovies`,
         get: (id) => `${API_BASE_URL}/movie/getmovie/${id}`
     }
-}
+}       

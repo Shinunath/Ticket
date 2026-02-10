@@ -1,5 +1,5 @@
 let router = require("express").Router();
-let { createTheatre, filterTheatre,getTheatre,updateTheatre,deleteTheatre } = require("../controllers/theatreController.js");
+let { createTheatre, filterTheatre, getTheatre, updateTheatre, deleteTheatre } = require("../controllers/theatreController.js");
 const upload = require("../middlewares/upload.js");
 
 router.post("/createtheatre", upload.fields([{ name: "image", maxCount: 1 }]), createTheatre);
